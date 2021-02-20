@@ -1,30 +1,20 @@
-#
-# Nginx Dockerfile
-#
-# https://github.com/dockerfile/nginx
-#
+FROM node:carbon
 
-# Pull base image.
-FROM dockerfile/ubuntu
 
-# Install Nginx.
-RUN \
-  add-apt-repository -y ppa:nginx/stable && \
-  apt-get update && \
-  apt-get install -y nginx && \
-  rm -rf /var/lib/apt/lists/* && \
-  echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
-  chown -R www-data:www-data /var/lib/nginx
+# Create app directory
+WORKDIR /usr/src/app
 
-# Define mountable directories.
-VOLUME ["/etc/nginx/sites-enabled", "/etc/nginx/certs", "/etc/nginx/conf.d", "/var/log/nginx", "/var/www/html"]
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
+COPY package*.json ./
 
-# Define working directory.
-WORKDIR /etc/nginx
+RUN npm install
+# If you are building your code for production
+# RUN npm install --only=production
 
-# Define default command.
-CMD ["nginx"]
+# Bundle app source
+COPY . .
 
-# Expose ports.
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8080
+CMD [ "npm", "start" ]
