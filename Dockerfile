@@ -1,9 +1,30 @@
-FROM python:3
+#
+# Nginx Dockerfile
+#
+# https://github.com/dockerfile/nginx
+#
 
-WORKDIR stat /var/lib/docker/tmp/docker-builder880724209/my_script.py
+# Pull base image.
+FROM dockerfile/ubuntu
 
-ADD my_script.py /
+# Install Nginx.
+RUN \
+  add-apt-repository -y ppa:nginx/stable && \
+  apt-get update && \
+  apt-get install -y nginx && \
+  rm -rf /var/lib/apt/lists/* && \
+  echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
+  chown -R www-data:www-data /var/lib/nginx
 
-RUN pip install pystrich
+# Define mountable directories.
+VOLUME ["/etc/nginx/sites-enabled", "/etc/nginx/certs", "/etc/nginx/conf.d", "/var/log/nginx", "/var/www/html"]
 
-CMD [ "python", "./my_script.py" ]
+# Define working directory.
+WORKDIR /etc/nginx
+
+# Define default command.
+CMD ["nginx"]
+
+# Expose ports.
+EXPOSE 80
+EXPOSE 443
